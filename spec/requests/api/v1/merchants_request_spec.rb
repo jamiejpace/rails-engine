@@ -59,6 +59,7 @@ RSpec.describe 'Merchants API' do
     merchants = JSON.parse(response.body, symbolize_names: true)
 
     expect(merchants).to have_key(:data)
+    expect(merchants[:data]).to be_an(Array)
     expect(merchants[:data]).to eq([])
   end
 end

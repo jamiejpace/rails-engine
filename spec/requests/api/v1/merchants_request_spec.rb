@@ -86,8 +86,7 @@ RSpec.describe 'Merchants API' do
       expect(merchant[:data][:attributes][:name]).to be_a(String)
     end
 
-    xit 'returns 404 status if merchant id not valid' do
-      #how to test this sad path...passes in postman because it automatically gives a 404
+    it 'returns 404 status if merchant id not valid' do
       merchant = create(:merchant, id: 1)
 
       get "/api/v1/merchants/2"

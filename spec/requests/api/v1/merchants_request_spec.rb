@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'Merchants API' do
-  it 'returns a list of 20 students at a time as default' do
+  it 'returns a list of 20 merchants at a time as default' do
     create_list(:merchant, 22)
 
     get '/api/v1/merchants'
@@ -27,7 +27,7 @@ RSpec.describe 'Merchants API' do
     end
   end
 
-  it 'returns a list of 20 students given a page number parameter' do
+  it 'returns a list of 20 merchants given a page number parameter' do
     create_list(:merchant, 22)
 
     get '/api/v1/merchants', params: { page: 2 }
@@ -39,7 +39,7 @@ RSpec.describe 'Merchants API' do
     expect(merchants[:data].count).to eq(2)
   end
 
-  it 'can return a different number of students per page' do
+  it 'can return a different number of merchants per page' do
     create_list(:merchant, 30)
 
     get '/api/v1/merchants', params: { per_page: 25 }

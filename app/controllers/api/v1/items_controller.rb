@@ -28,8 +28,8 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def update
-    item = Item.find(params[:id])
-    if item.update(item_params)
+    item = Item.find_by(id: params[:id])
+    if item && item.update(item_params)
       render json: ItemSerializer.new(item)
     else
       render json: {error: "not-found"}, status: 404

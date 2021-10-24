@@ -189,6 +189,13 @@ RSpec.describe 'Items API' do
       expect(response).to be_successful
       expect(item.name).to eq("Dog Bolo Tie")
     end
+
+    it 'can not update an item that does not exist' do
+      patch "/api/v1/items/2", params: { item: {name: "Dog beanie"} }
+
+      expect(response).to_not be_successful
+      expect(response.status).to eq(404)
+    end
   end
 
   describe 'Item delete endpoint' do

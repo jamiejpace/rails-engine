@@ -162,7 +162,7 @@ RSpec.describe 'Items API' do
       post '/api/v1/items', params: { item: item_params }
 
       item = JSON.parse(response.body, symbolize_names: true)
-      
+
       expect(response).to be_successful
       expect(response.status).to eq(201)
 
@@ -174,6 +174,20 @@ RSpec.describe 'Items API' do
       expect(item[:data][:attributes]).to be_a(Hash)
 
       expect(item[:data][:attributes]).to_not have_key(:color)
+    end
+  end
+
+  describe 'Item update endpoint' do
+    it 'can update an item' do
+      merchant = create(:merchant)
+      id = create(:item, merchant_id: merchant.id).id
+      previous_name = Item.last.name
+
+      patch "/api/v1/items/#{id}", params: { item: {name: "Dog Bolo Tie"} }
+      item = Item.find_by(id: id)
+
+      expect(response).to be_successful
+      expect(item.name).to eq("Dog Bolo Tie")
     end
   end
 end

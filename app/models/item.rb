@@ -5,6 +5,11 @@ class Item < ApplicationRecord
   has_many :invoices, through: :invoice_items
   has_many :transactions, through: :invoices
 
+  validates :name, presence: true
+  validates :description, presence: true
+  validates :unit_price, presence: true
+  validates :merchant_id, presence: true 
+
   def self.all_items_for_merchant(id)
     where(merchant_id: id)
   end

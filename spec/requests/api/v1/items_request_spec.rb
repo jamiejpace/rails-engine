@@ -201,8 +201,14 @@ RSpec.describe 'Items API' do
       delete "/api/v1/items/#{item.id}"
 
       expect(response).to be_successful
+      expect(response.status).to eq(204)
+      expect(response.body).to be_empty
       expect(Item.count).to eq(0)
-      expect(Item.find(item.id)).to raise_error(ActiveRecord::RecordNotFound)
+      expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    xit 'destroys invoice if deleted item was only item on invoice' do
+
     end
   end
 end

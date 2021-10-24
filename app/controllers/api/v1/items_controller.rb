@@ -36,6 +36,10 @@ class Api::V1::ItemsController < ApplicationController
     end
   end
 
+  def destroy
+    Item.delete(params[:id])
+  end
+
   private
 
   def item_params

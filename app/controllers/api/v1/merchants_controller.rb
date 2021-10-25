@@ -12,4 +12,11 @@ class Api::V1::MerchantsController < ApplicationController
       render json: {error: "not-found"}, status: 404
     end
   end
+
+  def find
+    merchant = Merchant.find_merchant_by_name(params[:name])
+    render json: MerchantSerializer.new(merchant)
+
+  end
+
 end

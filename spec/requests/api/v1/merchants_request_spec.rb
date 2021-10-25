@@ -112,4 +112,33 @@ RSpec.describe 'Merchants API' do
       expect(items[:data].count).to eq(2)
     end
   end
+
+  describe 'find one merchant endpoint' do
+    it 'can return one merchant based on search input' do
+      merchant1 = create(:merchant, name: "Yellow Hat Co")
+      merchant2 = create(:merchant, name: "Red Hat Co")
+
+      get '/api/v1/merchants/find', params: { name: "yellow" }
+
+      expect(response).to be_successful
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(merchant.count).to eq(1)
+      expect(merchant[:data]).to be_a(Hash)
+      expect(merchant[:data][:id]).to be_a(String)
+      expect(merchant[:data][:type]).to be_a(String)
+      expect(merchant[:data][:attributes]).to be_a(Hash)
+
+      expect(merchant[:data][:attributes]).to have_key(:name)
+      expect(merchant[:data][:attributes][:name]).to be_a(String)
+    end
+
+    it 'returns an error' do
+      merchant2 = create(:merchant, name: "Red Hat Co")
+      get '/api/v1/merchants/find', params: { name: "yellow" }
+
+      expect(response).to be_successful
+    end
+  end
 end

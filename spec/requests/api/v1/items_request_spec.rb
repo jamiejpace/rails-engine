@@ -218,4 +218,15 @@ RSpec.describe 'Items API' do
 
     end
   end
+
+  describe 'Item merchant endpoint' do
+    xit 'returns the merchant associated with an item' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id)
+
+      get "/api/v1/items/#{item1.id}/merchant"
+
+      expect(response).to be_successful
+    end
+  end
 end

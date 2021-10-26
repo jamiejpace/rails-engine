@@ -111,6 +111,12 @@ RSpec.describe 'Merchants API' do
 
       expect(items[:data].count).to eq(2)
     end
+
+    it 'returns an error if the merchant does not exist' do
+      get '/api/v1/merchants/1/items'
+
+      expect(response.status).to eq(404)
+    end
   end
 
   describe 'find one merchant endpoint' do

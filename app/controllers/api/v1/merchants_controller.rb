@@ -16,7 +16,5 @@ class Api::V1::MerchantsController < ApplicationController
   def find
     merchant = Merchant.find_merchant_by_name(params[:name])
     render json: MerchantSerializer.new(merchant)
-
   end
-
 end

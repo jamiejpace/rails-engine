@@ -14,7 +14,20 @@ class Api::V1::MerchantsController < ApplicationController
   end
 
   def find
-    merchant = Merchant.find_merchant_by_name(params[:name])
-    render json: MerchantSerializer.new(merchant)
+    if params[:name]
+      merchant = Merchant.find_merchant_by_name(params[:name])
+      render json: MerchantSerializer.new(merchant)
+    else
+      render json: {error: "bad request"}, status: 400
+    end
+  end
+
+  def most_items
+    if params[:quantity]
+      merchants = Merchant.most_items_sold(params[:quantity])
+      render json: MostItemsSerializer.new(merchants)
+    else
+      render json: {error: "bad request"}, status: 400
+    end
   end
 end

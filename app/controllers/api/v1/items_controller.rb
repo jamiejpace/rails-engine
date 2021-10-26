@@ -44,6 +44,18 @@ class Api::V1::ItemsController < ApplicationController
     Item.delete(params[:id])
   end
 
+  def find_all
+    if params[:name] && !params[:min_price] && !params[:max_price]
+      items = Item.find_items_by_name(params[:name])
+      render json: ItemSerializer.new(items)
+    elsif !params[:name] && (params[:min_price] || params[:max_price])
+      items = Item.find_items_by_price(params[:min_price], params[:max_price])
+      render json: ItemSerializer.new(items)
+    else
+      render json: {error: "not-found"}, status: 404
+    end
+  end
+
   private
 
   # def item_exists?

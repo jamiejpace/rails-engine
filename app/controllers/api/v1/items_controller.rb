@@ -1,4 +1,5 @@
 class Api::V1::ItemsController < ApplicationController
+  include Pagination
   def index
     if params[:merchant_id]
       if Merchant.exists?(params[:merchant_id])

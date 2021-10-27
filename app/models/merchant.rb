@@ -21,7 +21,7 @@ class Merchant < ApplicationRecord
 
   def self.top_revenue(quantity)
     joins(items: {invoice_items: {invoice: :transactions}})
-    .select("merchants.*, cast(SUM(invoice_items.unit_price * invoice_items.quantity) as decimal(100,2)) AS revenue")
+    .select("merchants.*, SUM(invoice_items.unit_price * invoice_items.quantity) AS revenue")
     .where("transactions.result = ?", "success")
     .group("merchants.id")
     .order("revenue desc")

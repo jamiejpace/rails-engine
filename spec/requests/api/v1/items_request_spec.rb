@@ -344,11 +344,13 @@ RSpec.describe 'Items API' do
         transaction1 = create(:transaction, invoice_id: invoice1.id, result: "success")
         transaction2 = create(:transaction, invoice_id: invoice2.id, result: "success")
 
-        get "/api/v1/revenue/items", params: { quanitity: 2 }
+        get "/api/v1/revenue/items", params: { quantity: 2 }
 
         expect(response).to be_successful
 
         merchant = JSON.parse(response.body, symbolize_names: true)
+
+        expect(merchant).to be_a(Hash)
       end
     end
   end

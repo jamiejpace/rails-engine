@@ -218,4 +218,140 @@ RSpec.describe 'Items API' do
 
     end
   end
+
+  describe 'Item merchant endpoint' do
+    it 'returns the merchant associated with an item' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id)
+
+      get "/api/v1/items/#{item1.id}/merchant"
+
+      expect(response).to be_successful
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(merchant.count).to eq(1)
+      expect(merchant[:data]).to be_a(Hash)
+      expect(merchant[:data][:id]).to be_a(String)
+      expect(merchant[:data][:type]).to be_a(String)
+      expect(merchant[:data][:attributes]).to be_a(Hash)
+
+      expect(merchant[:data][:attributes]).to have_key(:name)
+      expect(merchant[:data][:attributes][:name]).to be_a(String)
+    end
+
+    it 'returns an error if item does not exist' do
+      item = create(:item, id: 1)
+
+      get '/api/v1/items/2/merchant'
+
+      expect(response.status).to eq(404)
+    end
+  end
+
+  describe 'Find all items endpoint' do
+    it 'returns all items from a name search query' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, name: "ring pop")
+      item2 = create(:item, merchant_id: merchant.id, name: "diamond ring")
+      item3 = create(:item, merchant_id: merchant.id, name: "skittles")
+
+      get "/api/v1/items/find_all", params: { name: "ring" }
+
+      expect(response).to be_successful
+
+      merchants = JSON.parse(response.body, symbolize_names: true)
+      expect(merchants[:data].count).to eq(2)
+    end
+
+    it 'returns all items from a max_price search query' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, unit_price: 1.50)
+      item2 = create(:item, merchant_id: merchant.id, unit_price: 1.00)
+      item3 = create(:item, merchant_id: merchant.id, unit_price: 5.00)
+
+      get "/api/v1/items/find_all", params: { max_price: 2.00 }
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+      expect(items[:data].count).to eq(2)
+    end
+
+    it 'returns all items from a min_price search query' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, unit_price: 1.50)
+      item2 = create(:item, merchant_id: merchant.id, unit_price: 1.00)
+      item3 = create(:item, merchant_id: merchant.id, unit_price: 5.00)
+
+      get "/api/v1/items/find_all", params: { min_price: 2.00 }
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+      expect(items[:data].count).to eq(1)
+    end
+
+    it 'returns all items from a min and max price search query' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, unit_price: 1.50)
+      item2 = create(:item, merchant_id: merchant.id, unit_price: 1.00)
+      item3 = create(:item, merchant_id: merchant.id, unit_price: 5.00)
+      item3 = create(:item, merchant_id: merchant.id, unit_price: 1.75)
+
+      get "/api/v1/items/find_all", params: { min_price: 1.25, max_price: 2.00 }
+
+      expect(response).to be_successful
+
+      items = JSON.parse(response.body, symbolize_names: true)
+      expect(items[:data].count).to eq(2)
+    end
+
+    it 'returns a 404 status if there is a name and a price query' do
+      merchant = create(:merchant)
+      item1 = create(:item, merchant_id: merchant.id, unit_price: 1.50, name: "yellow")
+      item2 = create(:item, merchant_id: merchant.id, unit_price: 1.00)
+      item3 = create(:item, merchant_id: merchant.id, unit_price: 5.00)
+      item3 = create(:item, merchant_id: merchant.id, unit_price: 1.75)
+
+      get "/api/v1/items/find_all", params: { name: "yellow", max_price: 2.00 }
+
+      expect(response.status).to eq(404)
+    end
+  end
+
+  describe 'business intelligence endpoints' do
+    describe 'find items ranked by revenue endpoint' do
+      it 'will return a quantity of items ranked by desc revenue' do
+        merchant1 = create(:merchant)
+
+        customer1 = create(:customer)
+
+        item1 = create(:item, merchant_id: merchant1.id)
+        item2 = create(:item, merchant_id: merchant1.id)
+        item3 = create(:item, merchant_id: merchant1.id)
+        item4 = create(:item, merchant_id: merchant1.id)
+        item5 = create(:item, merchant_id: merchant1.id)
+        item6 = create(:item, merchant_id: merchant1.id)
+
+        invoice1 = create(:invoice, customer_id: customer1.id, merchant_id: merchant1.id)
+        invoice2 = create(:invoice, customer_id: customer1.id, merchant_id: merchant1.id)
+
+        invoice_item1 = create(:invoice_item, item_id: item1.id, invoice_id: invoice1.id, quantity: 10, unit_price: 2.00)
+        invoice_item2 = create(:invoice_item, item_id: item2.id, invoice_id: invoice1.id, quantity: 10, unit_price: 5.00)
+        invoice_item3 = create(:invoice_item, item_id: item3.id, invoice_id: invoice2.id, quantity: 5, unit_price: 3.00)
+
+        transaction1 = create(:transaction, invoice_id: invoice1.id, result: "success")
+        transaction2 = create(:transaction, invoice_id: invoice2.id, result: "success")
+
+        get "/api/v1/revenue/items", params: { quantity: 2 }
+
+        expect(response).to be_successful
+
+        merchant = JSON.parse(response.body, symbolize_names: true)
+
+        expect(merchant).to be_a(Hash)
+      end
+    end
+  end
 end

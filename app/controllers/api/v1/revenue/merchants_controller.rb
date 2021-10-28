@@ -1,10 +1,12 @@
 class Api::V1::Revenue::MerchantsController < ApplicationController
+  include ErrorHandling
+
   def ranked_by_revenue
     if params[:quantity] && params[:quantity].to_i > 0
       merchants = Merchant.top_revenue(params[:quantity])
       render json: RevenueSerializer.merchant_name_revenue(merchants)
     else
-      render json: {error: "bad request"}, status: 400
+      bad_request_400
     end
   end
 
@@ -13,7 +15,7 @@ class Api::V1::Revenue::MerchantsController < ApplicationController
       merchant = Merchant.find_merchant_revenue(params[:id])
       render json: RevenueSerializer.merchant_revenue(merchant)
     else
-      render json: {error: "not-found"}, status: 404
+      merchant_404
     end
   end
 end

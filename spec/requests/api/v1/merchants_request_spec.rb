@@ -120,7 +120,7 @@ RSpec.describe 'Merchants API' do
   end
 
   describe 'find one merchant endpoint' do
-    it 'can return one merchant based on search input' do
+    it 'can return one merchant based on name search input' do
       merchant1 = create(:merchant, name: "Yellow Hat Co")
       merchant2 = create(:merchant, name: "Red Hat Co")
 
@@ -140,16 +140,26 @@ RSpec.describe 'Merchants API' do
       expect(merchant[:data][:attributes][:name]).to be_a(String)
     end
 
-    xit 'returns an error' do
-      merchant2 = create(:merchant, name: "Red Hat Co")
+    it 'renders an error if name is left blank' do
+      get '/api/v1/merchants/find', params: { name: "" }
+
+      expect(response).to_not be_successful
+      expect(response.status).to eq(400)
+    end
+
+    it 'returns an object with nil values for attributes if no merchant returned from search' do
       get '/api/v1/merchants/find', params: { name: "yellow" }
 
       expect(response).to be_successful
+
+      merchant = JSON.parse(response.body, symbolize_names: true)
+
+      expect(merchant[:data][:attributes][:name]).to be(nil)
     end
   end
 
   describe 'business intelligence endpoints' do
-    describe 'find quantity of merchants by revenue' do
+    describe '#merchant_most_items_sold' do
       it 'returns a quantity of merchants sorted by desc revenue' do
         merchant2 = create(:merchant, name: "Second")
         merchant1 = create(:merchant, name: "The Best")
@@ -180,9 +190,16 @@ RSpec.describe 'Merchants API' do
 
         merchants = JSON.parse(response.body, symbolize_names: true)
       end
+
+      it 'renders a 400 if there is no quantity param' do
+        get "/api/v1/merchants/most_items"
+
+        expect(response).to_not be_successful
+        expect(response.status).to eq(400)
+      end
     end
 
-    describe 'find quantity of merchants by revenue' do
+    describe '#ranked_by_revenue' do
       it 'returns a quantity of merchants sorted by desc revenue' do
         merchant2 = create(:merchant, name: "Second")
         merchant1 = create(:merchant, name: "The Best")
@@ -213,9 +230,16 @@ RSpec.describe 'Merchants API' do
 
         merchants = JSON.parse(response.body, symbolize_names: true)
       end
+
+      it 'returns a 400 if quantity is a string' do
+        get "/api/v1/revenue/merchants", params: { quantity: "abc" }
+
+        expect(response).to_not be_successful
+        expect(response.status).to eq(400)
+      end
     end
 
-    describe 'total revenue for a given merchant endpoint' do
+    describe '#total_revenue' do
       it 'returns the revenue for a single merchant' do
         merchant1 = create(:merchant)
 
@@ -243,6 +267,13 @@ RSpec.describe 'Merchants API' do
         expect(response).to be_successful
 
         merchant = JSON.parse(response.body, symbolize_names: true)
+      end
+
+      it 'renders a 404 if no merchant found for given id' do
+        get "/api/v1/revenue/merchants/1"
+
+        expect(response).to_not be_successful
+        expect(response.status).to eq(404)
       end
     end
   end

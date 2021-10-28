@@ -1,12 +1,14 @@
 class Api::V1::ItemsController < ApplicationController
   include Pagination
+  include ErrorHandling
+
   def index
     if params[:merchant_id]
       if Merchant.exists?(params[:merchant_id])
         items = Item.all_items_for_merchant(params[:merchant_id])
         render json: ItemSerializer.new(items)
       else
-        render json: {error: "not-found"}, status: 404
+        item_404
       end
     else
       items = Item.limit(number_per_page).offset(page_number * number_per_page)
@@ -19,7 +21,7 @@ class Api::V1::ItemsController < ApplicationController
     if item
       render json: ItemSerializer.new(item)
     else
-      render json: {error: "not-found"}, status: 404
+      item_404
     end
   end
 
@@ -28,7 +30,7 @@ class Api::V1::ItemsController < ApplicationController
     if item.save
       render json: ItemSerializer.new(item), status: 201
     else
-      render json: {error: "not-found"}, status: 404
+      item_404
     end
   end
 
@@ -37,7 +39,7 @@ class Api::V1::ItemsController < ApplicationController
     if item && item.update(item_params)
       render json: ItemSerializer.new(item)
     else
-      render json: {error: "not-found"}, status: 404
+      item_404
     end
   end
 
@@ -47,22 +49,22 @@ class Api::V1::ItemsController < ApplicationController
 
   def find_all
     if params[:name] && !params[:min_price] && !params[:max_price]
-      items = Item.find_items_by_name(params[:name])
-      render json: ItemSerializer.new(items)
+      if params[:name].empty?
+        bad_request_400
+      else
+        items = Item.find_items_by_name(params[:name])
+        render json: ItemSerializer.new(items)
+      end
     elsif !params[:name] && (params[:min_price] || params[:max_price])
       items = Item.find_items_by_price(params[:min_price], params[:max_price])
       render json: ItemSerializer.new(items)
     else
-      render json: {error: "not-found"}, status: 404
+      bad_request_400
     end
   end
 
   private
 
-  # def item_exists?
-  #   !Item.exists?
-  #   render json: {error: "not-found"}, status: 404
-  # end
 
   def item_params
     params.require(:item).permit(:name, :description, :unit_price, :merchant_id)

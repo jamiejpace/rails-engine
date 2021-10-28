@@ -7,7 +7,7 @@ class Merchant < ApplicationRecord
 
   def self.find_merchant_by_name(name)
     where("name ILIKE ?", "%#{name}%")
-    .order("LOWER(name)")
+    .order(:name)
   end
 
   def self.most_items_sold(quantity = 5)

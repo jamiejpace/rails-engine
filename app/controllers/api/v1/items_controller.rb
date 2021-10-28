@@ -1,7 +1,7 @@
 class Api::V1::ItemsController < ApplicationController
   include Pagination
   include ErrorHandling
-  
+
   def index
     if params[:merchant_id]
       if Merchant.exists?(params[:merchant_id])
@@ -49,8 +49,12 @@ class Api::V1::ItemsController < ApplicationController
 
   def find_all
     if params[:name] && !params[:min_price] && !params[:max_price]
-      items = Item.find_items_by_name(params[:name])
-      render json: ItemSerializer.new(items)
+      if params[:name].empty?
+        bad_request_400
+      else
+        items = Item.find_items_by_name(params[:name])
+        render json: ItemSerializer.new(items)
+      end
     elsif !params[:name] && (params[:min_price] || params[:max_price])
       items = Item.find_items_by_price(params[:min_price], params[:max_price])
       render json: ItemSerializer.new(items)

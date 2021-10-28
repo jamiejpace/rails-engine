@@ -16,7 +16,7 @@ class Item < ApplicationRecord
 
   def self.find_items_by_name(name)
     where("name ILIKE ?", "%#{name}%")
-    .order("LOWER(name)")
+    .order(:name)
   end
 
   def self.find_items_by_price(min, max)
